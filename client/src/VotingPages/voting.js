@@ -1,4 +1,8 @@
 import React from 'react';
+import axios from 'axios';
+import { server } from '../serverChoose';
+import generatePriPub from '../helper/clientPriPub';
+import generateCipher from '../helper/encryptor';
 import {
   Button,
   Container,
@@ -59,9 +63,63 @@ export default function ShopSearch() {
     e.preventDefault();
     const { party } = e.target.elements;
 
-    enqueueSnackbar('Vote Success', {
-      variant: 'success',
-    });
+    const { clientPri, clientPub, sharedKey } = generatePriPub(
+      voterDetails.serverPub
+    );
+
+    console.log(clientPri, clientPub, sharedKey);
+
+    const payload = generateCipher(
+      {
+        data: {
+          from: '',
+          to: party.value,
+        },
+        timestamp: Date.now(),
+      },
+      sharedKey,
+      voterDetails.token
+    );
+
+    axios
+      .post(
+        server + '/secured/vote',
+        {
+          payload: payload,
+        },
+        {
+          headers: {
+            authorization: voterDetails.token,
+            publickey: clientPub,
+          },
+        }
+      )
+      .then((res_) => {
+        console.log(res_.data);
+        if (res_.status === 200) {
+          if (res_.data === 'success') {
+            enqueueSnackbar('Vote Success', {
+              variant: 'success',
+            });
+          } else if (res_.data === 'Already Voted') {
+            throw new Error('voted');
+          }
+        } else {
+          throw new Error('Failed');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.message === 'voted') {
+          enqueueSnackbar('Multiple Votes Not Allowed', {
+            variant: 'info',
+          });
+        } else {
+          enqueueSnackbar('Vote failed', {
+            variant: 'error',
+          });
+        }
+      });
   };
 
   return voterDetails ? (

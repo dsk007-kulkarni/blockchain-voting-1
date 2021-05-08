@@ -1,58 +1,81 @@
-const luckyGen = require("../helpers/luckyNumGen");
-const pow = require("../helpers/modularExp");
-const Vote = require("../blockchain/blockchain").Vote;
-const client = require("../helpers/postgres");
-const generatePass = require("pr-pass");
-const crypto = require("crypto-js");
+const luckyGen = require('../helpers/luckyNumGen');
+const pow = require('../helpers/modularExp');
+const Vote = require('../blockchain/blockchain').Vote;
+const client = require('../helpers/postgres');
+const generatePass = require('pr-pass');
+const crypto = require('crypto-js');
 
 module.exports = {
-  vote: (req, res) => {
-    const { uid, bday } = req.authorizedUser;
+  vote: async (req, res) => {
+    try {
+      const { uid, bday } = req.authorizedUser;
 
-    /**
-     * Diffie Hellman, ( g = 17 ,p = 541)
-     * get public from client
-     * Generate private server again
-     * calculate shared private
-     */
-    console.log(req.authorizedUser, req.headers);
+      /**
+       * Diffie Hellman, ( g = 17 ,p = 541)
+       * get public from client
+       * Generate private server again
+       * calculate shared private
+       */
 
-    const clientPublic = parseInt(req.headers.publickey);
+      console.log(req.authorizedUser, req.headers);
 
-    const serverPrivate = luckyGen({
-      uid,
-      bday,
-    });
-    const sharedKey = pow(clientPublic, serverPrivate, 541);
-    console.log(sharedKey);
-    /**
-     * Generate Symmetric Key with PR Pass
-     * You have lucky number as sharedKey from Diffie Hellman
-     */
+      const clientPublic = parseInt(req.headers.publickey);
 
-    const secretAES = generatePass(req.headers.authorization, sharedKey);
+      const serverPrivate = luckyGen({
+        uid,
+        bday,
+      });
+      const sharedKey = pow(clientPublic, serverPrivate, 541);
+      console.log(sharedKey);
+      /**
+       * Generate Symmetric Key with PR Pass
+       * You have lucky number as sharedKey from Diffie Hellman
+       */
 
-    /**
-     * Decrypt with the symmetric key generated from PR Pass.
-     */
+      const secretAES = generatePass(req.headers.authorization, sharedKey);
 
-    console.log(secretAES);
-    const cipher = crypto.AES.decrypt(req.body.payload, secretAES).toString(
-      crypto.enc.Utf8
-    );
-    // const cipher = crypto.AES.encrypt(
-    //   JSON.stringify(req.body),
-    //   secretAES
-    // ).toString();
-    console.log(cipher);
-    req.body = JSON.parse(cipher);
+      /**
+       * Decrypt with the symmetric key generated from PR Pass.
+       */
 
-    const { data, timestamp } = req.body;
-    console.log(req.body);
+      console.log(secretAES);
+      const cipher = crypto.AES.decrypt(req.body.payload, secretAES).toString(
+        crypto.enc.Utf8
+      );
+      // const cipher = crypto.AES.encrypt(
+      //   JSON.stringify(req.body),
+      //   secretAES
+      // ).toString();
+      console.log(cipher);
 
-    votes.push(new Vote(data));
+      /**
+       * request body is converted back to the original plaintext
+       * JSON fomrat that was sent by the voter
+       */
 
-    console.log(votes);
-    return res.status(200).send("success");
+      req.body = JSON.parse(cipher);
+
+      const { data, timestamp } = req.body;
+      console.log(req.body);
+
+      /**
+       * Vote is added to the block.
+       */
+
+      votes.push(
+        new Vote({ ...data, from: req.authorizedUser.uid, timestamp })
+      );
+      console.log(votes);
+
+      const res_ = await client.query(
+        'INSERT INTO VOTED(UID, VOTE) VALUES($1, $2)',
+        [req.authorizedUser.uid, '1']
+      );
+
+      res.status(200).send('success');
+    } catch (err) {
+      console.log(err);
+      res.status(503).send('Error');
+    }
   },
 };
