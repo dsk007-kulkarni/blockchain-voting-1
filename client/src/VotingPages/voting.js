@@ -4,7 +4,7 @@ import { server } from '../serverChoose';
 import generatePriPub from '../helper/clientPriPub';
 import generateCipher from '../helper/encryptor';
 import generateHmac from '../helper/generateMAC';
-
+import generatePass from 'pr-pass';
 import {
   Button,
   Container,
@@ -75,7 +75,7 @@ export default function ShopSearch() {
         timestamp,
         serverTime: voterDetails.timestamp,
       },
-      sharedKey
+      generatePass(voterDetails.token, sharedKey)
     );
 
     const payload = generateCipher(

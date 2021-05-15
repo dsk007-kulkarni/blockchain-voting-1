@@ -11,11 +11,12 @@ const generatePass = require('pr-pass');
 module.exports = (body, sharedKey, token) => {
   const serializedBody = JSON.stringify(body);
 
-  const aesSecret = generatePass(token, sharedKey);
+  const cipher = crypto.AES.encrypt(
+    serializedBody,
+    generatePass(token, sharedKey)
+  ).toString();
 
-  const cipher = crypto.AES.encrypt(serializedBody, aesSecret).toString();
-
-  console.log(serializedBody, aesSecret, cipher);
+  console.log(serializedBody, cipher);
 
   return cipher;
 };

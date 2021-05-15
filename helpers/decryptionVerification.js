@@ -38,7 +38,7 @@ module.exports = (req, res, next) => {
     console.log(secretAES);
 
     const payload = req.body.payload.split('|');
-
+    console.log(payload);
     var cipher = crypto.AES.decrypt(payload[0], secretAES).toString(
       crypto.enc.Utf8
     );
@@ -46,11 +46,14 @@ module.exports = (req, res, next) => {
     cipher = JSON.parse(cipher);
     console.log(cipher);
 
-    const hmac = generateHmac({
-      to: cipher.data.to,
-      timestamp: cipher.timestamp,
-      serverTime: cipher.timestamp - cipher.serverTime,
-    });
+    const hmac = generateHmac(
+      {
+        to: cipher.data.to,
+        timestamp: cipher.timestamp,
+        serverTime: cipher.timestamp - cipher.serverTime,
+      },
+      secretAES
+    );
     if (hmac === payload[1]) {
       req.body = cipher;
       /**

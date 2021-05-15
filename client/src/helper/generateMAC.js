@@ -7,6 +7,7 @@ const crypto = require('crypto-js');
  */
 module.exports = (data, secret) => {
   var serializedData = JSON.stringify(data);
+  console.log(serializedData, secret);
   var hmac = crypto.HmacSHA256(serializedData, secret).toString();
   return hmac;
 };
