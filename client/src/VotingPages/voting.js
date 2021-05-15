@@ -3,6 +3,8 @@ import axios from 'axios';
 import { server } from '../serverChoose';
 import generatePriPub from '../helper/clientPriPub';
 import generateCipher from '../helper/encryptor';
+import generateHmac from '../helper/generateMAC';
+
 import {
   Button,
   Container,
@@ -14,24 +16,22 @@ import {
 import { useSnackbar } from 'notistack';
 import Page from './page';
 import VoterContext from '../VoterContext';
+
 var data = [
   {
-    src:
-      'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
     title: 'Narendra Modi',
     id: 'modi',
     party: 'BJP',
   },
   {
-    src:
-      'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
     title: 'Mamta Banerjee',
     id: 'banerjee',
     party: 'BJP',
   },
   {
-    src:
-      'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
     title: 'vijay Patil',
     id: 'patil',
     party: 'BJP',
@@ -66,8 +66,17 @@ export default function ShopSearch() {
     const { clientPri, clientPub, sharedKey } = generatePriPub(
       voterDetails.serverPub
     );
-
+    const timestamp = Date.now();
     console.log(clientPri, clientPub, sharedKey);
+
+    const hmac = generateHmac(
+      {
+        to: party.value,
+        timestamp,
+        serverTime: voterDetails.timestamp,
+      },
+      sharedKey
+    );
 
     const payload = generateCipher(
       {
@@ -75,7 +84,8 @@ export default function ShopSearch() {
           from: '',
           to: party.value,
         },
-        timestamp: Date.now(),
+        timestamp,
+        serverTime: timestamp - voterDetails.timestamp,
       },
       sharedKey,
       voterDetails.token
@@ -85,7 +95,7 @@ export default function ShopSearch() {
       .post(
         server + '/secured/vote',
         {
-          payload: payload,
+          payload: `${payload}|${hmac}`,
         },
         {
           headers: {
