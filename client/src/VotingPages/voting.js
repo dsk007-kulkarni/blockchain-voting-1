@@ -16,44 +16,45 @@ import {
 import { useSnackbar } from 'notistack';
 import Page from './page';
 import VoterContext from '../VoterContext';
+import { useHistory } from 'react-router';
 
 var data = [
   {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
-    title: 'Narendra Modi',
-    id: 'modi',
-    party: 'BJP',
+    src: '',
+    title: 'Party A',
+    id: 'a',
+    party: 'Candidate A',
   },
   {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
-    title: 'Mamta Banerjee',
-    id: 'banerjee',
-    party: 'BJP',
+    src: '',
+    title: 'Party B',
+    id: 'b',
+    party: 'Candidate B',
   },
   {
-    src: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Prime_Minister_of_India_Narendra_Modi.jpg',
-    title: 'vijay Patil',
-    id: 'patil',
-    party: 'BJP',
+    src: '',
+    title: 'Party C',
+    id: 'c',
+    party: 'Candidate C',
   },
 ];
 
 export default function ShopSearch() {
   const { enqueueSnackbar } = useSnackbar();
+  const history = useHistory();
   const { voterDetails } = React.useContext(VoterContext);
-  const [party, setParty] = React.useState(data);
+  const [party] = React.useState(data);
   const [value, setValue] = React.useState('');
 
   React.useEffect(() => {
-    // setProducts((products) => [...products]);
+    if (!voterDetails) {
+      enqueueSnackbar('Verify Aadhar First', {
+        variant: 'info',
+      });
+      history.push('/');
+    }
+    // eslint-disable-next-line
   }, []);
-
-  // if (!voterDetails) {
-  //   enqueueSnackbar('Verify Aadhar First', {
-  //     variant: 'info',
-  //   });
-  //   window.location.href = '/';
-  // }
 
   const handleChange = (event) => {
     setValue(event.target.value);
@@ -132,7 +133,7 @@ export default function ShopSearch() {
       });
   };
 
-  return voterDetails ? (
+  return (
     <Page title="Vote">
       <p className="text-center font-black text-3xl">List of Candidates</p>
       <Container>
@@ -196,7 +197,5 @@ export default function ShopSearch() {
         </form>
       </Container>
     </Page>
-  ) : (
-    <>No aadhar details were submitted, hence you cannot vote </>
   );
 }

@@ -14,7 +14,7 @@ module.exports = (a, b, n) => {
     var lsb = b % 2;
     b = Math.floor(b / 2);
 
-    if (lsb == 1) {
+    if (lsb === 1) {
       result = result * x;
       result = result % n;
     }

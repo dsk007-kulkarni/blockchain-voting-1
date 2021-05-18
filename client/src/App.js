@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
-import HomePage from './finalPage/App';
+import HomePage from './finalPage/bind';
+import voting from './VotingPages/voting';
 import VoterContext from './VoterContext';
 
 function App() {
@@ -13,18 +14,17 @@ function App() {
 
   return (
     <Router>
-      <Switch>
-        <SnackbarProvider maxSnack={3}>
-          <VoterContext.Provider
-            value={{
-              voterDetails: voter,
-              setVoterDetails: updateVoter,
-            }}
-          >
-            <HomePage />
-          </VoterContext.Provider>
-        </SnackbarProvider>
-      </Switch>
+      <SnackbarProvider maxSnack={3}>
+        <VoterContext.Provider
+          value={{
+            voterDetails: voter,
+            setVoterDetails: updateVoter,
+          }}
+        >
+          <Route exact path="/" component={HomePage} />
+          <Route path="/voting" component={voting} />
+        </VoterContext.Provider>
+      </SnackbarProvider>
     </Router>
   );
 }
