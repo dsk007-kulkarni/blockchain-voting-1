@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
      * calculate shared private
      */
 
-    console.log(req.authorizedUser, req.headers);
+    console.log(req.authorizedUser);
 
     const clientPublic = parseInt(req.headers.publickey);
 
@@ -32,17 +32,18 @@ module.exports = (req, res, next) => {
      */
 
     const secretAES = generatePass(req.headers.authorization, sharedKey);
+    console.log(secretAES);
+
     /**
      * Decrypt with the symmetric key generated from PR Pass.
      */
-    console.log(secretAES);
 
     const payload = req.body.payload.split('|');
     console.log(payload);
+
     var cipher = crypto.AES.decrypt(payload[0], secretAES).toString(
       crypto.enc.Utf8
     );
-
     cipher = JSON.parse(cipher);
     console.log(cipher);
 

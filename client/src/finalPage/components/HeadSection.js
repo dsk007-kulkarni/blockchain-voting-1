@@ -109,7 +109,6 @@ function HeadSection(props) {
     e.preventDefault();
     const { aadhar, birth } = e.target.elements;
 
-    history.push('/voting');
     axios
       .post(server + '/verifyaadhar', {
         uid: aadhar.value,
@@ -122,6 +121,7 @@ function HeadSection(props) {
           enqueueSnackbar('Verification Success', {
             variant: 'success',
           });
+          history.push('/voting');
           console.log(voterDetails);
         } else {
           throw new Error('Error occured');
@@ -136,7 +136,7 @@ function HeadSection(props) {
   };
   return (
     <Fragment>
-      <div className={classNames('lg-p-top', classes.wrapper)}>
+      <div className={classNames('lg-p-top')}>
         <div>
           <Container component="main" maxWidth="xs">
             <CssBaseline />
