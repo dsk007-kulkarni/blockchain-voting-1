@@ -22,11 +22,11 @@ const verifyJWT = require('./helpers/jwtSign').verify;
 global.votes = [];
 console.log(votes);
 
-// cron.schedule("*/40 * * * * *", () => {
-//   addBlock(votes);
-//   votes = [];
-//   console.log("running 40 sec");
-// });
+cron.schedule('*/10 * * * * *', () => {
+  addBlock(votes);
+  votes = [];
+  console.log('running 10 sec');
+});
 app.use(cors());
 app.use(express.json());
 app.use(
