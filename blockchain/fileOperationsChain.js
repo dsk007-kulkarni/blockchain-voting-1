@@ -1,21 +1,22 @@
-const fs = require("fs");
-const { BlockChain } = require("./blockchain");
+const fs = require('fs');
+const { BlockChain } = require('./blockchain');
+const { spawn } = require('child_process');
 
 const read = () => {
   try {
-    if (fs.existsSync("./a")) {
-      var read = fs.readFileSync("./a");
+    if (fs.existsSync('./a')) {
+      var read = fs.readFileSync('./a');
       read = JSON.parse(read);
       var blockchain = new BlockChain(read);
       return blockchain;
     } else {
       var bChain = new BlockChain({ genesis: null, blocks: null });
-      fs.writeFileSync("./a", JSON.stringify(bChain, null, 2));
+      fs.writeFileSync('./a', JSON.stringify(bChain, null, 2));
       return bChain;
     }
   } catch (err) {
     console.log(err);
-    return new Error("Error Occured. Check Logs");
+    return new Error('Error Occured. Check Logs');
   }
 };
 
@@ -29,13 +30,13 @@ const addBlock = (votes) => {
 
     console.log(blockchain.getTotalVotesCount());
     if (check) {
-      fs.writeFileSync("./a", JSON.stringify(blockchain, null, 2));
+      fs.writeFileSync('./a', JSON.stringify(blockchain, null, 2));
     } else {
-      throw new Error("Block Not added");
+      throw new Error('Block Not added');
     }
   } catch (err) {
     console.log(err);
-    return new Error("Error Occured. Check logs");
+    return new Error('Error Occured. Check logs');
   }
 };
 
